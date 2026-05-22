@@ -9,7 +9,8 @@
     "test:unit": "jest tests/unit/ --coverage",
     "coverage:check": "jest --coverage --coverageThreshold='{\"global\":{\"lines\":60}}'",
     "security:check": "grep -rn 'AKIA\\|aws_secret\\|password\\s*=' --include='*.js' src/ && exit 1 || echo 'OK'",
-    "build": "bash scripts/package-lambda.sh"
+    "compile": "esbuild src/handler.ts --bundle --platform=node --outdir=dist --format=cjs",
+    "build": "npm run compile && bash scripts/package-lambda.sh"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "@types/aws-lambda": "^8.10.161",
     "@types/node": "^25.9.1",
     "dotenv": "^17.4.2",
+    "esbuild": "^0.28.0",
     "eslint": "^10.4.0",
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
