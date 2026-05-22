@@ -7,7 +7,7 @@ on:
     branches: [develop]
 
 env:
-  ARTIFACT_BUCKET: interop-sgsss-artifacts
+  ARTIFACT_BUCKET: interoperabilidad-sistema-salud
   LAMBDA_NAME: lambda-delivery
 
 jobs:
