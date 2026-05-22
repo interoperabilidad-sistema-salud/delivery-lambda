@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+jspm_packages/
+
+# Build / Dist
+dist/
+build/
+
+# Variables de entorno
+.env
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Temporales del SO
+*.tmp
+*.temp
