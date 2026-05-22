@@ -13,7 +13,7 @@ export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
   const batchItemFailures: SQSBatchItemFailure[] = [];
 
   for (const record of event.Records) {
-    const startTime = Date.now();
+    //const startTime = Date.now();
     let bundle: Bundle | undefined;
 
     try {
