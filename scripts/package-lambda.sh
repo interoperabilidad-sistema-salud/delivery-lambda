@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 echo "=== Empaquetando Lambda Delivery ==="
-rm -rf dist/
-mkdir -p dist/package
+rm -rf dist/package
 
-npm ci --omit=dev
-cp -r src/ dist/package/src/
-cp package.json dist/package/
-cp -r node_modules/ dist/package/node_modules/
+# Compilar TypeScript → JavaScript
+npm run compile
+
+# El zip solo necesita el archivo compilado
+mkdir -p dist/package
+cp dist/handler.js dist/package/handler.js
 
 cd dist/package
 zip -r ../lambda-delivery.zip . -q
