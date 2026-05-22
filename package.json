@@ -1,0 +1,43 @@
+{
+  "name": "lambda-delivery",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src/ tests/",
+    "test:unit": "jest tests/unit/ --coverage",
+    "coverage:check": "jest --coverage --coverageThreshold='{\"global\":{\"lines\":60}}'",
+    "security:check": "grep -rn 'AKIA\\|aws_secret\\|password\\s*=' --include='*.js' src/ && exit 1 || echo 'OK'",
+    "build": "bash scripts/package-lambda.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interoperabilidad-sistema-salud/delivery-lambda.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/interoperabilidad-sistema-salud/delivery-lambda/issues"
+  },
+  "homepage": "https://github.com/interoperabilidad-sistema-salud/delivery-lambda#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/aws-lambda": "^8.10.161",
+    "@types/node": "^25.9.1",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.4.0",
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "ts-jest": "^29.4.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1051.0",
+    "@aws-sdk/client-sqs": "^3.1048.0",
+    "@aws-sdk/lib-dynamodb": "^3.1051.0"
+  }
+}
