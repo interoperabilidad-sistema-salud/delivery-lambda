@@ -2,9 +2,9 @@ name: CI — Lambda Delivery
 
 on:
   push:
-    branches: [main, develop]
+    branches: [develop]
   pull_request:
-    branches: [main, develop]
+    branches: [develop]
 
 env:
   ARTIFACT_BUCKET: interop-sgsss-artifacts
@@ -29,7 +29,7 @@ jobs:
 
   publish:
     needs: test-and-build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
