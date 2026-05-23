@@ -1,6 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { SQSRecord } from 'aws-lambda';
+import { ulid } from 'ulidx';
 import { AuditRecord, AuditStatus } from '../types/dynamodb.types.js'
 import { Bundle } from '../types/sqs.types.js';
 
@@ -25,7 +26,7 @@ export async function saveAuditRecord(params: {
   const queueName = record.eventSourceARN.split(':').at(-1) ?? 'unknown';
 
   const auditItem: AuditRecord = {
-    transferId: `AUDIT#${record.messageId}`,
+    transferId: ulid(),
     timestamp: now,
     messageId: record.messageId,
     status,
