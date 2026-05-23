@@ -25,7 +25,7 @@ export async function saveAuditRecord(params: {
   const queueName = record.eventSourceARN.split(':').at(-1) ?? 'unknown';
 
   const auditItem: AuditRecord = {
-    id: `AUDIT#${record.messageId}`,
+    transferId: `AUDIT#${record.messageId}`,
     timestamp: now,
     messageId: record.messageId,
     status,
