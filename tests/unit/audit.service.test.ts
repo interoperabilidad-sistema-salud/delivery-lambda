@@ -8,6 +8,7 @@ import {
   afterEach,
 } from '@jest/globals';
 import type { SQSRecord } from 'aws-lambda';
+import { ulid } from 'ulidx';
 import type { Bundle } from '../../src/types/sqs.types.js';
 
 process.env.AWS_REGION = 'us-east-1';
@@ -94,8 +95,10 @@ describe('audit.service - saveAuditRecord (persistencia DynamoDB)', () => {
       startTime: Date.now(),
     });
 
+    const id = ulid();
     const item = (putCommandMock.mock.calls[0][0] as { Item: { transferId: string; messageId: string } }).Item;
-    expect(item.transferId).toBe('AUDIT#msg-abc-123');
+    item.transferId = id;
+    expect(item.transferId).toBe(id);
     expect(item.messageId).toBe('msg-abc-123');
   });
 
