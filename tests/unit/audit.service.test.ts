@@ -10,7 +10,6 @@ import {
 import type { SQSRecord } from 'aws-lambda';
 import type { Bundle } from '../../src/types/sqs.types.js';
 
-process.env.AUDIT_TABLE_NAME = 'audit-table-test';
 process.env.AWS_REGION = 'us-east-1';
 
 const sendMock = jest.fn<(...args: unknown[]) => Promise<unknown>>();
