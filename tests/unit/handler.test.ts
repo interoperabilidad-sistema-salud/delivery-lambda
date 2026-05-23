@@ -3,12 +3,33 @@ import {
   describe,
   it,
   expect,
+  beforeAll,
   beforeEach,
   afterEach,
-} from '@jest/globals'
-import { handler } from '../../src/handler.js';
+} from '@jest/globals';
 import { Bundle } from '../../src/types/sqs.types.js';
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import type { AuditStatus } from '../../src/types/dynamodb.types.js';
+
+type SaveAuditArgs = {
+  record: SQSRecord;
+  status: AuditStatus;
+  payload?: Bundle;
+  startTime: number;
+  error?: Error;
+};
+
+const saveAuditRecordMock = jest.fn<(args: SaveAuditArgs) => Promise<void>>();
+
+jest.unstable_mockModule('../../src/service/audit.service.js', () => ({
+  saveAuditRecord: saveAuditRecordMock,
+}));
+
+let handler: typeof import('../../src/handler.js').handler;
+
+beforeAll(async () => {
+  ({ handler } = await import('../../src/handler.js'));
+});
 
 const validBundle: Bundle = {
   resourceType: 'Bundle',
@@ -51,6 +72,8 @@ const buildEvent = (records: SQSRecord[]): SQSEvent => ({ Records: records });
 
 describe('handler (consumo SQS)', () => {
   beforeEach(() => {
+    saveAuditRecordMock.mockReset();
+    saveAuditRecordMock.mockResolvedValue(undefined);
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -127,5 +150,84 @@ describe('handler (consumo SQS)', () => {
       'a',
       'c',
     ]);
+  });
+});
+
+describe('handler -> audit.service (integración DynamoDB)', () => {
+  beforeEach(() => {
+    saveAuditRecordMock.mockReset();
+    saveAuditRecordMock.mockResolvedValue(undefined);
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('invoca saveAuditRecord con status SUCCESS para cada record válido', async () => {
+    await handler(buildEvent([
+      buildRecord({ messageId: 'ok-1' }),
+      buildRecord({ messageId: 'ok-2' }),
+    ]));
+
+    expect(saveAuditRecordMock).toHaveBeenCalledTimes(2);
+    expect(saveAuditRecordMock.mock.calls[0][0].status).toBe('SUCCESS');
+    expect(saveAuditRecordMock.mock.calls[1][0].status).toBe('SUCCESS');
+  });
+
+  it('pasa el bundle parseado como payload cuando el record es válido', async () => {
+    await handler(buildEvent([buildRecord({ messageId: 'ok-1' })]));
+
+    const args = saveAuditRecordMock.mock.calls[0][0];
+    expect(args.payload).toEqual(validBundle);
+  });
+
+  it('invoca saveAuditRecord con status ERROR e incluye el error capturado cuando el body es inválido', async () => {
+    await handler(buildEvent([buildRecord({ messageId: 'bad-1', body: '{{{' })]));
+
+    expect(saveAuditRecordMock).toHaveBeenCalledTimes(1);
+    const args = saveAuditRecordMock.mock.calls[0][0];
+    expect(args.status).toBe('ERROR');
+    expect(args.error).toBeInstanceOf(Error);
+    expect(args.payload).toBeUndefined();
+  });
+
+  it('propaga el messageId fallido a batchItemFailures aunque saveAuditRecord de ERROR también falle', async () => {
+    saveAuditRecordMock.mockRejectedValueOnce(new Error('Throughput exceeded'));
+
+    const result = await handler(
+      buildEvent([buildRecord({ messageId: 'bad-with-audit-fail', body: '{{{' })])
+    );
+
+    expect(result.batchItemFailures).toEqual([
+      { itemIdentifier: 'bad-with-audit-fail' },
+    ]);
+  });
+
+  it('agrega el record a batchItemFailures cuando saveAuditRecord en SUCCESS falla', async () => {
+    saveAuditRecordMock.mockRejectedValueOnce(new Error('Dynamo timeout'));
+    saveAuditRecordMock.mockResolvedValueOnce(undefined);
+
+    const result = await handler(
+      buildEvent([buildRecord({ messageId: 'audit-fail-1' })])
+    );
+
+    expect(result.batchItemFailures).toEqual([
+      { itemIdentifier: 'audit-fail-1' },
+    ]);
+    expect(saveAuditRecordMock).toHaveBeenCalledTimes(2);
+    expect(saveAuditRecordMock.mock.calls[0][0].status).toBe('SUCCESS');
+    expect(saveAuditRecordMock.mock.calls[1][0].status).toBe('ERROR');
+  });
+
+  it('pasa un startTime cercano al instante actual al saveAuditRecord', async () => {
+    const before = Date.now();
+    await handler(buildEvent([buildRecord({ messageId: 'ok-1' })]));
+    const after = Date.now();
+
+    const args = saveAuditRecordMock.mock.calls[0][0];
+    expect(args.startTime).toBeGreaterThanOrEqual(before);
+    expect(args.startTime).toBeLessThanOrEqual(after);
   });
 });
