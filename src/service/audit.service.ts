@@ -8,7 +8,7 @@ const dynamo = DynamoDBDocumentClient.from(
   new DynamoDBClient({ region: process.env.AWS_REGION ?? 'us-east-1' })
 );
 
-const TABLE_NAME = 'transfers';
+const TABLE_NAME = 'interop-sgsss-transfers-dev';
 
 export async function saveAuditRecord(params: {
   record: SQSRecord;

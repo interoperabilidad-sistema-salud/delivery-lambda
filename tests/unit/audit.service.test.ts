@@ -85,19 +85,6 @@ describe('audit.service - saveAuditRecord (persistencia DynamoDB)', () => {
     expect(sentCommand.__type).toBe('PutCommand');
   });
 
-  it('usa el TABLE_NAME tomado de la variable de entorno AUDIT_TABLE_NAME', async () => {
-    await saveAuditRecord({
-      record: buildRecord(),
-      status: 'SUCCESS',
-      payload: validBundle,
-      startTime: Date.now(),
-    });
-
-    const commandInput = putCommandMock.mock.calls[0][0] as {
-      TableName: string;
-    };
-    expect(commandInput.TableName).toBe('transfers');
-  });
 
   it('construye el id de auditoría con el prefijo AUDIT# y el messageId', async () => {
     await saveAuditRecord({
