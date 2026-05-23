@@ -9,7 +9,7 @@ const sendBundleToDestinationEPS = async (Bundle: Bundle): Promise<void> => {
   console.log(`Historia clinica ${Bundle.entry} procesada correctamente`);
 };
 
-exports.handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
   const batchItemFailures: SQSBatchItemFailure[] = [];
 
   for (const record of event.Records) {
