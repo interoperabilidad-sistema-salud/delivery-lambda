@@ -10,7 +10,6 @@ import {
 import type { SQSRecord } from 'aws-lambda';
 import type { Bundle } from '../../src/types/sqs.types.js';
 
-process.env.AUDIT_TABLE_NAME = 'audit-table-test';
 process.env.AWS_REGION = 'us-east-1';
 
 const sendMock = jest.fn<(...args: unknown[]) => Promise<unknown>>();
@@ -97,7 +96,7 @@ describe('audit.service - saveAuditRecord (persistencia DynamoDB)', () => {
     const commandInput = putCommandMock.mock.calls[0][0] as {
       TableName: string;
     };
-    expect(commandInput.TableName).toBe('audit-table-test');
+    expect(commandInput.TableName).toBe('transfers');
   });
 
   it('construye el id de auditoría con el prefijo AUDIT# y el messageId', async () => {
