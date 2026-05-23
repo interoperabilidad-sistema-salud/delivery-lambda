@@ -94,8 +94,8 @@ describe('audit.service - saveAuditRecord (persistencia DynamoDB)', () => {
       startTime: Date.now(),
     });
 
-    const item = (putCommandMock.mock.calls[0][0] as { Item: { id: string; messageId: string } }).Item;
-    expect(item.id).toBe('AUDIT#msg-abc-123');
+    const item = (putCommandMock.mock.calls[0][0] as { Item: { transferId: string; messageId: string } }).Item;
+    expect(item.transferId).toBe('AUDIT#msg-abc-123');
     expect(item.messageId).toBe('msg-abc-123');
   });
 
